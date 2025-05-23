@@ -1,6 +1,3 @@
-// Optimal Articulation Point Algorithm
-
-
 #include <iostream>
 #include <climits>
 using namespace std;
@@ -26,7 +23,6 @@ public:
     int totalVertices();
     void DFS(int src);
     void DFSdisplay(int src,int& count,int* pre,int* post,bool* visited,int* parent);
-    void findArticulationPoint();
     ~Graph(){
         for(int i=0;i<v;i++){
             delete[] graph[i];
@@ -47,19 +43,15 @@ void Graph::DFS(int src){
         parent[i] = -1;
     }
     int count=0;
-    DFSdisplay(src,count,pre,post,visited,parent);
-    
-    int par;
+    int totalConnectedComponents = 0;
+    cout<<endl;
     for(int i=0;i<v;i++){
-        if(parent[i] == -1)par = i;
+        if(visited[i] == false){
+            totalConnectedComponents++;
+            DFSdisplay(i,count,pre,post,visited,parent);
+        }
     }
-    int countChildOfRoot = 0;
-    for(int i=0;i<v;i++){
-        if(parent[i] == par)countChildOfRoot++;
-    }
-    if(countChildOfRoot>1)cout<<"\nNode "<<par<<" is the Articulation Point";
-
-
+    cout<<"\nTotal number of connected components in Graph:- "<<totalConnectedComponents<<endl;
     delete[] pre;
     delete[] post;
     delete[] parent;
@@ -69,6 +61,7 @@ void Graph::DFS(int src){
 void Graph::DFSdisplay(int src,int& count,int* pre,int* post,bool* visited,int* parent){
     if(count>=2*v)return;
     visited[src] = true;
+    cout<<src<<" ";
     pre[src] = count;
     count = count+1;
     for(int i=0;i<v;i++){
@@ -79,12 +72,6 @@ void Graph::DFSdisplay(int src,int& count,int* pre,int* post,bool* visited,int* 
     }
     post[src] = count;
     count = count+1;
-}
-
-void Graph::findArticulationPoint(){
-    for(int i=0;i<v;i++){
-        DFS(i);
-    }
 }
 
 int Graph::totalVertices(){
@@ -145,20 +132,22 @@ Graph makeGraph(){
 
 int main(){
     cout<<"\nWelcome to the World of Programming\n";
-    cout<<"Program is dedicated to find Articulation Points Using Tarjan's Algorithm \nIt uses Depth First Search Using Pre and Post Method\n";
+    cout<<"Program is dedicated to find total number of connected components by Depth First Search Using Pre and Post Method\n";
 
+    // Create a graph with 5 vertices (0 to 4)
     Graph G(5);
 
-    // 🔗 Test Case: Expected articulation points = 0, 2, 3
-    G.addEdge(0, 1, 1);  // 0-1
-    G.addEdge(0, 2, 1);  // 0-2
-    G.addEdge(2, 3, 1);  // 2-3
-    G.addEdge(3, 4, 1);  // 3-4
+    // Hardcoded Edges
+    G.addEdge(0, 1, 1);
+    G.addEdge(0, 2, 1);
+    // G.addEdge(1, 3, 1);
+    G.addEdge(1, 4, 1);
 
     cout << "\nAdjacency Matrix of the Graph:\n";
     G.displayGraph();
 
-    G.findArticulationPoint();  
+    cout << "\nDFS Traversal starting from vertex 0:\n";
+    G.DFS(0);
 
     return 0;
 }
