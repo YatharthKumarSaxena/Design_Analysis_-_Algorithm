@@ -35,7 +35,7 @@ public:
     void addEdge(int src,int des,int weight);
     int totalVertices();
     void BFSdisplay(int src,Node* nodes);
-    bool checkPathExist(int node1,int node2);
+    bool isGraphDisconnected();
 };
 
 int Graph::totalVertices(){
@@ -116,26 +116,27 @@ void Graph::BFSdisplay(int src,Node* nodes){
     return;
 }
 
-bool Graph::checkPathExist(int node1,int node2){
-    if(node1>=v || node2>=v)return false;
+bool Graph::isGraphDisconnected(){
     Node* nodes = new Node[v];
     for(int i=0;i<v;i++){
         nodes[i].val = i;
     }
     int count = 0;
-    this->BFSdisplay(node1,nodes);
-    if(nodes[node2].color == 'b' && nodes[node1].color == 'b')return true;
     for(int i=0;i<v;i++){
-        nodes[i].color = 'w';
+        if(nodes[i].color == 'w'){
+            if(!count){
+                this->BFSdisplay(i,nodes);
+                count++;
+            }
+            else return true;
+        };
     }
-    this->BFSdisplay(node2,nodes);
-    if(nodes[node2].color == 'b' && nodes[node1].color == 'b')return true;
     return false;
 }
 
 int main() {
     cout << "\nWelcome to the World of Programming\n";
-    cout << "This Program is dedicated to check where there exist a path between two nodes in Graph by BFS Algorithm using the Colouring Scheme\n";
+    cout << "This Program is dedicated to check where Graph is disconnected by BFS Algorithm using the Colouring Scheme\n";
 
     Graph G(7);  // 7 vertices: 0 to 6
 
@@ -150,11 +151,11 @@ int main() {
     // Display Graph
     G.displayGraph();
 
-    if(G.checkPathExist(0,3)){
-        cout<<"\nPath exists between "<<0<<"th and "<<3<<"rd Node\n";
+    if(G.isGraphDisconnected()){
+        cout<<"\nGraph is disconnected\n";
     }
     else{
-        cout<<"\nPath does not exist between "<<0<<"th and "<<3<<"rd Node\n";
+        cout<<"\nGraph is not disconnected\n";
     }
     return 0;
 }
