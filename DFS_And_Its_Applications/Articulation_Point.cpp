@@ -1,3 +1,5 @@
+// Brute Force Articulation Point Algorithm Using Only Root Node Concept
+
 #include <iostream>
 #include <climits>
 using namespace std;
@@ -21,8 +23,9 @@ public:
     void displayGraph();
     void addEdge(int src,int des,int weight);
     int totalVertices();
-    void DFS(int src,int& count,int* pre,int* post,bool* visited,int* parent);
-    void edgeTypeDetection();
+    void DFS(int src);
+    void DFSdisplay(int src,int& count,int* pre,int* post,bool* visited,int* parent);
+    void findArticulationPoint();
     ~Graph(){
         for(int i=0;i<v;i++){
             delete[] graph[i];
@@ -31,7 +34,7 @@ public:
     }
 };
 
-void Graph::edgeTypeDetection(){
+void Graph::DFS(int src){
     bool* visited = new bool[v];
     int* post = new int[v];
     int* pre = new int[v];
@@ -43,33 +46,26 @@ void Graph::edgeTypeDetection(){
         parent[i] = -1;
     }
     int count=0;
-    DFS(0,count,pre,post,visited,parent);
-    for(int i=0;i<v;i++){
-        for(int j=0;j<v;j++){
-            if(graph[i][j]){ // Means Edge Exist
-                if(parent[j] == i){
-                    cout<<"Edge ("<<i<<","<<j<<") is Tree Edge\n";
-                }
-                else if(pre[i]<pre[j] && post[i]>post[j]){
-                    cout<<"Edge ("<<i<<","<<j<<") is Forward Edge\n";
-                }
-                else if(pre[i]>pre[j] && post[i]<post[j]){
-                    cout<<"Edge ("<<i<<","<<j<<") is Backward Edge\n";
-                }
-                else{
-                    cout<<"Edge ("<<i<<","<<j<<") is Cross Edge\n";
-                }
-            }
-        }
-    }
+    DFSdisplay(src,count,pre,post,visited,parent);
     
+    int par;
+    for(int i=0;i<v;i++){
+        if(parent[i] == -1)par = i;
+    }
+    int countChildOfRoot = 0;
+    for(int i=0;i<v;i++){
+        if(parent[i] == par)countChildOfRoot++;
+    }
+    if(countChildOfRoot>1)cout<<"\nNode "<<par<<" is the Articulation Point";
+
+
     delete[] pre;
     delete[] post;
     delete[] parent;
     delete[] visited;
 }
 
-void Graph::DFS(int src,int& count,int* pre,int* post,bool* visited,int* parent){
+void Graph::DFSdisplay(int src,int& count,int* pre,int* post,bool* visited,int* parent){
     if(count>=2*v)return;
     visited[src] = true;
     pre[src] = count;
@@ -77,11 +73,17 @@ void Graph::DFS(int src,int& count,int* pre,int* post,bool* visited,int* parent)
     for(int i=0;i<v;i++){
         if(graph[src][i] && visited[i]==false){
             parent[i] = src;
-            DFS(i,count,pre,post,visited,parent);
+            DFSdisplay(i,count,pre,post,visited,parent);
         }
     }
     post[src] = count;
     count = count+1;
+}
+
+void Graph::findArticulationPoint(){
+    for(int i=0;i<v;i++){
+        DFS(i);
+    }
 }
 
 int Graph::totalVertices(){
@@ -109,6 +111,7 @@ void Graph::addEdge(int src,int des,int weight){
         return;
     }
     graph[src][des] = weight;
+    graph[des][src] = weight;
     cout<<"Edge added successfully\n";
 }
 
@@ -141,37 +144,20 @@ Graph makeGraph(){
 
 int main(){
     cout<<"\nWelcome to the World of Programming\n";
-    cout<<"Program is dedicated to find type of each edge in directed Graph by Depth First Search Using Pre and Post Method\n";
-    cout<<"This Program tells about the type of edge:- Cross Edge, Forward Edge, Backward Edge and Tree Edge\n";
-    
-    Graph G(9); // 9 vertices (0 to 8)
+    cout<<"Program is dedicated to find Articulation Points on Depth First Search Using Pre and Post Method\n";
 
-    // Add 20 edges
-    G.addEdge(0, 1, 1);  // Tree
-    G.addEdge(0, 2, 1);  // Tree
-    G.addEdge(1, 3, 1);  // Tree
-    G.addEdge(1, 4, 1);  // Tree
-    G.addEdge(2, 5, 1);  // Tree
-    G.addEdge(3, 0, 1);  // Backward
-    G.addEdge(4, 1, 1);  // Backward
-    G.addEdge(4, 6, 1);  // Tree
-    G.addEdge(5, 2, 1);  // Backward
-    G.addEdge(5, 7, 1);  // Tree
-    G.addEdge(6, 3, 1);  // Cross
-    G.addEdge(7, 4, 1);  // Cross
-    G.addEdge(7, 8, 1);  // Tree
-    G.addEdge(8, 5, 1);  // Backward
-    G.addEdge(2, 4, 1);  // Forward
-    G.addEdge(0, 6, 1);  // Forward
-    G.addEdge(8, 6, 1);  // Cross
-    G.addEdge(3, 7, 1);  // Cross
-    G.addEdge(6, 8, 1);  // Forward
-    G.addEdge(1, 5, 1);  // Forward
+    Graph G(5);
+
+    // 🔗 Test Case: Expected articulation points = 0, 2, 3
+    G.addEdge(0, 1, 1);  // 0-1
+    G.addEdge(0, 2, 1);  // 0-2
+    G.addEdge(2, 3, 1);  // 2-3
+    G.addEdge(3, 4, 1);  // 3-4
 
     cout << "\nAdjacency Matrix of the Graph:\n";
     G.displayGraph();
-    cout<<endl;
-    G.edgeTypeDetection();
+
+    G.findArticulationPoint();  
 
     return 0;
 }

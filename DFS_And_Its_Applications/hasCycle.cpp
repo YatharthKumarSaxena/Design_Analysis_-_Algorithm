@@ -22,7 +22,7 @@ public:
     void addEdge(int src,int des,int weight);
     int totalVertices();
     void DFS(int src,int& count,int* pre,int* post,bool* visited,int* parent);
-    void edgeTypeDetection();
+    void hasCycle();
     ~Graph(){
         for(int i=0;i<v;i++){
             delete[] graph[i];
@@ -31,7 +31,7 @@ public:
     }
 };
 
-void Graph::edgeTypeDetection(){
+void Graph::hasCycle(){
     bool* visited = new bool[v];
     int* post = new int[v];
     int* pre = new int[v];
@@ -43,26 +43,30 @@ void Graph::edgeTypeDetection(){
         parent[i] = -1;
     }
     int count=0;
-    DFS(0,count,pre,post,visited,parent);
+    for(int i=0;i<v;i++){
+        if(visited[i] == false){
+            DFS(i,count,pre,post,visited,parent);
+        }
+    }
+    bool cycleExists = false;
+    int cycleCount = 0;
     for(int i=0;i<v;i++){
         for(int j=0;j<v;j++){
             if(graph[i][j]){ // Means Edge Exist
-                if(parent[j] == i){
-                    cout<<"Edge ("<<i<<","<<j<<") is Tree Edge\n";
-                }
-                else if(pre[i]<pre[j] && post[i]>post[j]){
-                    cout<<"Edge ("<<i<<","<<j<<") is Forward Edge\n";
-                }
-                else if(pre[i]>pre[j] && post[i]<post[j]){
+                if(pre[i]>pre[j] && post[i]<post[j]){
                     cout<<"Edge ("<<i<<","<<j<<") is Backward Edge\n";
-                }
-                else{
-                    cout<<"Edge ("<<i<<","<<j<<") is Cross Edge\n";
+                    cycleCount++;
+                    cycleExists = true;
                 }
             }
         }
     }
-    
+    if(cycleExists){
+        cout<<"\nHence total "<<cycleCount<<" cycles exist\n";
+    }
+    else{
+        cout<<"No cycle Exists in the Graph\n";
+    }
     delete[] pre;
     delete[] post;
     delete[] parent;
@@ -141,8 +145,8 @@ Graph makeGraph(){
 
 int main(){
     cout<<"\nWelcome to the World of Programming\n";
-    cout<<"Program is dedicated to find type of each edge in directed Graph by Depth First Search Using Pre and Post Method\n";
-    cout<<"This Program tells about the type of edge:- Cross Edge, Forward Edge, Backward Edge and Tree Edge\n";
+    cout<<"Program is dedicated to find whether cycle exists in directed Graph by Depth First Search Using Pre and Post Method\n";
+    cout<<"This Program detects cycle by the concept of Backward Edge in DFS Tree\n";
     
     Graph G(9); // 9 vertices (0 to 8)
 
@@ -171,7 +175,7 @@ int main(){
     cout << "\nAdjacency Matrix of the Graph:\n";
     G.displayGraph();
     cout<<endl;
-    G.edgeTypeDetection();
+    G.hasCycle();
 
     return 0;
 }
